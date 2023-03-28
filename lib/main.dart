@@ -1,17 +1,16 @@
 import 'dart:math';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
-void main() => runApp(VisibleAppointments());
+void main() => runApp(const VisibleAppointments());
 
 class VisibleAppointments extends StatelessWidget {
+  const VisibleAppointments({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
       home: MyApp(),
     );
@@ -19,6 +18,8 @@ class VisibleAppointments extends StatelessWidget {
 }
 
 class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
   @override
   State<StatefulWidget> createState() => ScheduleExample();
 }
@@ -26,9 +27,9 @@ class MyApp extends StatefulWidget {
 class ScheduleExample extends State<MyApp> {
   List<Meeting>? _appointments;
   List<Appointment>? _visibleAppointments = <Appointment>[];
-  List<String> _subjectCollection = <String>[];
+  final List<String> _subjectCollection = <String>[];
   late _MeetingDataSource _events;
-  List<Color> _colorCollection = <Color>[];
+  final List<Color> _colorCollection = <Color>[];
 
   @override
   void initState() {
@@ -45,8 +46,8 @@ class ScheduleExample extends State<MyApp> {
           child: Column(
             children: [
               TextButton(
-                child: Text('Get visible appointments'),
                 onPressed: _showDialog,
+                child: const Text('Get visible appointments'),
               ),
               Expanded(
                 child: Scrollbar(
@@ -63,41 +64,50 @@ class ScheduleExample extends State<MyApp> {
   }
 
   void viewChanged(ViewChangedDetails viewChangedDetails) {
-    List<DateTime> _date = viewChangedDetails.visibleDates;
+    List<DateTime> date = viewChangedDetails.visibleDates;
     _visibleAppointments =
-        _events.getVisibleAppointments(_date[0], '', _date[_date.length - 1]);
+        _events.getVisibleAppointments(date[0], '', date[date.length - 1]);
   }
 
-  _showDialog() async {
-    await showDialog(
-      builder: (context) => new AlertDialog(
-        title: Container(
-          child: Text("Visible dates contains " +
+  Future<void> _showDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Visible dates contains " +
               _visibleAppointments!.length.toString() +
               " appointments"),
-        ),
-        contentPadding: const EdgeInsets.all(16.0),
-        content: ListView.builder(
-            itemCount: _visibleAppointments!.length,
-            itemBuilder: (BuildContext context, int index) {
-              return Container(
-                  color: _visibleAppointments![index].color,
-                  child: Text(_visibleAppointments![index].subject));
-            }),
-        actions: <Widget>[
-          new FlatButton(
-              child: const Text('OK'),
+          contentPadding: const EdgeInsets.all(16.0),
+          content: Container(
+            width: 800,
+            height: 800,
+            child: ListView.builder(
+                itemCount: _visibleAppointments!.length,
+                shrinkWrap: true,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(
+                    child: Container(
+                        color: _visibleAppointments![index].color,
+                        child: Text(_visibleAppointments![index].subject)),
+                  );
+                }),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Ok'),
               onPressed: () {
-                Navigator.pop(context);
-              })
-        ],
-      ),
-      context: context,
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
   List<Meeting> _addAppointment() {
-    final List<Meeting>? meetingCollection = <Meeting>[];
+    final List<Meeting> meetingCollection = <Meeting>[];
     _subjectCollection.add('Meeting');
     _subjectCollection.add('Planning');
     _subjectCollection.add('Project Plan');
@@ -120,7 +130,7 @@ class ScheduleExample extends State<MyApp> {
     _colorCollection.add(const Color(0xFF636363));
     _colorCollection.add(const Color(0xFF0A8043));
 
-    final DateTime today = DateTime(2020, 05, 11);
+    final DateTime today = DateTime.now();
     final DateTime rangeStartDate = DateTime(today.year, today.month, today.day)
         .add(const Duration(days: -500));
     final DateTime rangeEndDate = DateTime(today.year, today.month, today.day)
@@ -128,20 +138,20 @@ class ScheduleExample extends State<MyApp> {
     Random random = Random();
     for (DateTime i = rangeStartDate;
     i.isBefore(rangeEndDate);
-    i = i.add(Duration(days: 1))) {
+    i = i.add(const Duration(days: 1))) {
       final DateTime date = i;
       for (int j = 0; j < 2; j++) {
         final DateTime startDate =
         DateTime(date.year, date.month, date.day, 2, 0, 0);
-        meetingCollection?.add(Meeting(
+        meetingCollection.add(Meeting(
             _subjectCollection[random.nextInt(10)],
             startDate,
-            startDate.add(Duration(hours: 1)),
+            startDate.add(const Duration(hours: 1)),
             _colorCollection[random.nextInt(10)],
             false));
       }
     }
-    return meetingCollection!;
+    return meetingCollection;
   }
 }
 
